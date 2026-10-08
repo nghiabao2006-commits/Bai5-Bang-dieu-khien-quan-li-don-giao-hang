@@ -16,7 +16,6 @@ namespace Bai5
         public Form1()
         {
             InitializeComponent();
-            // wire up events
             this.Load += Form1_Load;
             this.KeyDown += Form1_KeyDown;
             this.dataGridViewItems.CellValidating += DataGridViewItems_CellValidating;
@@ -30,15 +29,9 @@ namespace Bai5
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            // initialize status and start clock
             UpdateClock();
             timerClock.Start();
 
-            // set some default values
-            if (comboShipping.Items.Count > 0)
-                comboShipping.SelectedIndex = 0;
-
-            // format numeric columns
             colQuantity.ValueType = typeof(int);
             colWeight.ValueType = typeof(decimal);
             colUnitPrice.ValueType = typeof(decimal);
@@ -59,14 +52,128 @@ namespace Bai5
 
         private void DataGridViewItems_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
         {
-            // ensure previous handlers removed
             e.Control.KeyPress -= EditingControl_KeyPress;
             e.Control.KeyPress += EditingControl_KeyPress;
+
+            e.Control.TextChanged -= EditingControl_TextChanged;
+            e.Control.TextChanged += EditingControl_TextChanged;
+            try
+            {
+                errorProvider.SetIconAlignment((Control)e.Control, ErrorIconAlignment.MiddleRight);
+                errorProvider.SetIconPadding((Control)e.Control, 2);
+            }
+            catch { }
+        }
+
+        private void EditingControl_TextChanged(object sender, EventArgs e)
+        {
+            var editingControl = sender as TextBox;
+            if (editingControl == null) return;
+
+            int colIndex = dataGridViewItems.CurrentCell.ColumnIndex;
+            string colName = dataGridViewItems.Columns[colIndex].Name;
+            var cell = dataGridViewItems.CurrentCell;
+
+            string text = editingControl.Text;
+            string message = string.Empty;
+
+            if (colName == "colQuantity")
+            {
+                if (!int.TryParse(text, out int q))
+                    message = "Số lượng phải là số nguyên";
+                else if (q <= 0)
+                    message = "Số lượng phải > 0";
+            }
+            else if (colName == "colWeight")
+            {
+                if (!decimal.TryParse(text, NumberStyles.Any, CultureInfo.CurrentCulture, out decimal w))
+                    message = "Trọng lượng phải là số";
+                else if (w <= 0)
+                    message = "Trọng lượng phải > 0";
+            }
+            else if (colName == "colUnitPrice")
+            {
+                if (!decimal.TryParse(text, NumberStyles.Any, CultureInfo.CurrentCulture, out decimal p))
+                    message = "Đơn giá phải là số";
+                else if (p <= 0)
+                    message = "Đơn giá phải > 0";
+            }
+
+            if (!string.IsNullOrEmpty(message))
+            {
+                errorProvider.SetError(editingControl, message);
+                if (cell != null) cell.ErrorText = message;
+            }
+            else
+            {
+                errorProvider.SetError(editingControl, string.Empty);
+                if (cell != null) cell.ErrorText = string.Empty;
+            }
+
+            if (dataGridViewItems.CurrentCell != null)
+            {
+                UpdateTotalsLive(dataGridViewItems.CurrentCell.RowIndex, dataGridViewItems.CurrentCell.ColumnIndex, editingControl.Text);
+            }
+        }
+
+        private void UpdateTotalsLive(int editRow, int editCol, string editText)
+        {
+            int totalQty = 0;
+            decimal totalWeight = 0m;
+            decimal totalAmount = 0m;
+
+            for (int r = 0; r < dataGridViewItems.Rows.Count; r++)
+            {
+                var row = dataGridViewItems.Rows[r];
+                if (row.IsNewRow) continue;
+
+                int qty = 0;
+                decimal weight = 0m;
+                decimal amount = 0m;
+
+                object cQty = row.Cells["colQuantity"].Value;
+                object cWeight = row.Cells["colWeight"].Value;
+                object cTotal = row.Cells["colTotal"].Value;
+
+                if (r == editRow)
+                {
+                    if (editCol == dataGridViewItems.Columns["colQuantity"].Index)
+                    {
+                        if (int.TryParse(editText, out int q)) qty = q;
+                    }
+                    else if (cQty != null && int.TryParse(cQty.ToString(), out int q2)) qty = q2;
+
+                    if (editCol == dataGridViewItems.Columns["colWeight"].Index)
+                    {
+                        if (decimal.TryParse(editText, NumberStyles.Any, CultureInfo.CurrentCulture, out decimal w)) weight = w;
+                    }
+                    else if (cWeight != null && decimal.TryParse(cWeight.ToString(), NumberStyles.Any, CultureInfo.CurrentCulture, out decimal w2)) weight = w2;
+
+                    if (editCol == dataGridViewItems.Columns["colUnitPrice"].Index)
+                    {
+                        if (decimal.TryParse(editText, NumberStyles.Any, CultureInfo.CurrentCulture, out decimal t)) amount = t * qty;
+                    }
+                    else if (cTotal != null && decimal.TryParse(cTotal.ToString(), NumberStyles.Any, CultureInfo.CurrentCulture, out decimal t2)) amount = t2;
+                }
+                else
+                {
+                    if (cQty != null && int.TryParse(cQty.ToString(), out int q3)) qty = q3;
+                    if (cWeight != null && decimal.TryParse(cWeight.ToString(), NumberStyles.Any, CultureInfo.CurrentCulture, out decimal w3)) weight = w3;
+                    if (cTotal != null && decimal.TryParse(cTotal.ToString(), NumberStyles.Any, CultureInfo.CurrentCulture, out decimal t3)) amount = t3;
+                }
+
+                totalQty += qty;
+                totalWeight += qty * weight;
+                totalAmount += amount;
+            }
+
+            toolStripStatusTotalQty.Text = $"Tổng SL: {totalQty}";
+            toolStripStatusTotalWeight.Text = $"Tổng trọng lượng: {totalWeight:N2} kg";
+            toolStripStatusTotalAmount.Text = $"Tổng tiền: {totalAmount:N2}";
         }
 
         private void EditingControl_KeyPress(object sender, KeyPressEventArgs e)
         {
-            // allow digits, control, decimal point and minus only where appropriate
             var editingControl = sender as TextBox;
             if (editingControl == null) return;
 
@@ -75,17 +182,16 @@ namespace Bai5
 
             if (colName == "colQuantity")
             {
-                // integers only
                 if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
                     e.Handled = true;
             }
             else if (colName == "colWeight" || colName == "colUnitPrice")
             {
-                // allow digits, one decimal separator
+               
                 char dec = Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator);
                 if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && e.KeyChar != dec)
                     e.Handled = true;
-                // prevent more than one decimal
+               
                 if (e.KeyChar == dec && editingControl.Text.Contains(dec))
                     e.Handled = true;
             }
@@ -95,57 +201,66 @@ namespace Bai5
         {
             var col = dataGridViewItems.Columns[e.ColumnIndex];
             var editingControl = dataGridViewItems.EditingControl;
+            var cell = dataGridViewItems.Rows[e.RowIndex].Cells[e.ColumnIndex];
+
+            void SetErrorFor(string message)
+            {
+                if (editingControl != null)
+                    errorProvider.SetError(editingControl, message);
+                else
+                    errorProvider.SetError(dataGridViewItems, message);
+                cell.ErrorText = message ?? string.Empty;
+            }
 
             if (col.Name == "colQuantity")
             {
                 if (!int.TryParse(Convert.ToString(e.FormattedValue), out int qty))
                 {
-                    if (editingControl != null) errorProvider.SetError(editingControl, "Số lượng phải là số nguyên");
+                    SetErrorFor("Số lượng phải là số nguyên");
                 }
                 else if (qty <= 0)
                 {
-                    if (editingControl != null) errorProvider.SetError(editingControl, "Số lượng phải > 0");
+                    SetErrorFor("Số lượng phải > 0");
                 }
                 else
                 {
-                    if (editingControl != null) errorProvider.SetError(editingControl, string.Empty);
+                    SetErrorFor(string.Empty);
                 }
             }
             else if (col.Name == "colWeight")
             {
                 if (!decimal.TryParse(Convert.ToString(e.FormattedValue), NumberStyles.Any, CultureInfo.CurrentCulture, out decimal w))
                 {
-                    if (editingControl != null) errorProvider.SetError(editingControl, "Trọng lượng phải là số");
+                    SetErrorFor("Trọng lượng phải là số");
                 }
                 else if (w <= 0)
                 {
-                    if (editingControl != null) errorProvider.SetError(editingControl, "Trọng lượng phải > 0");
+                    SetErrorFor("Trọng lượng phải > 0");
                 }
                 else
                 {
-                    if (editingControl != null) errorProvider.SetError(editingControl, string.Empty);
+                    SetErrorFor(string.Empty);
                 }
             }
             else if (col.Name == "colUnitPrice")
             {
                 if (!decimal.TryParse(Convert.ToString(e.FormattedValue), NumberStyles.Any, CultureInfo.CurrentCulture, out decimal p))
                 {
-                    if (editingControl != null) errorProvider.SetError(editingControl, "Đơn giá phải là số");
+                    SetErrorFor("Đơn giá phải là số");
+                }
+                else if (p <= 0)
+                {
+                    SetErrorFor("Đơn giá phải > 0");
                 }
                 else
                 {
-                    if (editingControl != null) errorProvider.SetError(editingControl, string.Empty);
+                    SetErrorFor(string.Empty);
                 }
             }
         }
 
         private void DataGridViewItems_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
-            // clear any editing control error
-            var editingControl = dataGridViewItems.EditingControl;
-            if (editingControl != null) errorProvider.SetError(editingControl, string.Empty);
-
-            // recalc row and totals
             if (e.RowIndex >= 0)
             {
                 UpdateRowTotal(dataGridViewItems.Rows[e.RowIndex]);
@@ -216,20 +331,19 @@ namespace Bai5
                 if (cTotal != null && decimal.TryParse(cTotal.ToString(), NumberStyles.Any, CultureInfo.CurrentCulture, out decimal t)) amount = t;
 
                 totalQty += qty;
-                totalWeight += qty * weight; // weight per item * qty
+                totalWeight += qty * weight; 
                 totalAmount += amount;
             }
 
-            toolStripStatusTotalQty.Text = $"Total Qty: {totalQty}";
-            toolStripStatusTotalWeight.Text = $"Total Weight: {totalWeight:N2} kg";
-            toolStripStatusTotalAmount.Text = $"Total Amount: {totalAmount:N2}";
+            toolStripStatusTotalQty.Text = $"Tổng SL: {totalQty}";
+            toolStripStatusTotalWeight.Text = $"Tổng trọng lượng: {totalWeight:N2} kg";
+            toolStripStatusTotalAmount.Text = $"Tổng tiền: {totalAmount:N2}";
         }
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.F2)
             {
-                // add new row and start editing first cell
                 int idx = dataGridViewItems.Rows.Add();
                 dataGridViewItems.CurrentCell = dataGridViewItems.Rows[idx].Cells[0];
                 dataGridViewItems.BeginEdit(true);

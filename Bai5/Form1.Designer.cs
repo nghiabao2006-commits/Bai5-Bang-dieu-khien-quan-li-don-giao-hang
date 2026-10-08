@@ -35,10 +35,7 @@
             this.groupBoxCustomer = new System.Windows.Forms.GroupBox();
             this.txtCustomer = new System.Windows.Forms.TextBox();
             this.labelCustomer = new System.Windows.Forms.Label();
-            this.tabPageShipping = new System.Windows.Forms.TabPage();
-            this.groupBoxShipping = new System.Windows.Forms.GroupBox();
-            this.comboShipping = new System.Windows.Forms.ComboBox();
-            this.labelShipping = new System.Windows.Forms.Label();
+            // shipping tab removed
             this.dataGridViewItems = new System.Windows.Forms.DataGridView();
             this.colItemName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colQuantity = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -59,8 +56,6 @@
             this.tabControlLeft.SuspendLayout();
             this.tabPageCustomer.SuspendLayout();
             this.groupBoxCustomer.SuspendLayout();
-            this.tabPageShipping.SuspendLayout();
-            this.groupBoxShipping.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewItems)).BeginInit();
             this.statusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).BeginInit();
@@ -87,7 +82,6 @@
             // 
             this.tabControlLeft.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControlLeft.Controls.Add(this.tabPageCustomer);
-            this.tabControlLeft.Controls.Add(this.tabPageShipping);
             this.tabControlLeft.Location = new System.Drawing.Point(0, 0);
             this.tabControlLeft.Name = "tabControlLeft";
             this.tabControlLeft.SelectedIndex = 0;
@@ -135,48 +129,7 @@
             // 
             // tabPageShipping
             // 
-            this.tabPageShipping.Controls.Add(this.groupBoxShipping);
-            this.tabPageShipping.Location = new System.Drawing.Point(4, 22);
-            this.tabPageShipping.Name = "tabPageShipping";
-            this.tabPageShipping.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageShipping.Size = new System.Drawing.Size(252, 402);
-            this.tabPageShipping.TabIndex = 1;
-            this.tabPageShipping.Text = "Vận chuyển";
-            this.tabPageShipping.UseVisualStyleBackColor = true;
-            // 
-            // groupBoxShipping
-            // 
-            this.groupBoxShipping.Controls.Add(this.comboShipping);
-            this.groupBoxShipping.Controls.Add(this.labelShipping);
-            this.groupBoxShipping.Dock = System.Windows.Forms.DockStyle.Top;
-            this.groupBoxShipping.Location = new System.Drawing.Point(3, 3);
-            this.groupBoxShipping.Name = "groupBoxShipping";
-            this.groupBoxShipping.Size = new System.Drawing.Size(246, 100);
-            this.groupBoxShipping.TabIndex = 0;
-            this.groupBoxShipping.TabStop = false;
-            this.groupBoxShipping.Text = "Loại vận chuyển";
-            // 
-            // comboShipping
-            // 
-            this.comboShipping.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboShipping.FormattingEnabled = true;
-            this.comboShipping.Items.AddRange(new object[] {
-            "Tiêu chuẩn",
-            "Nhanh",
-            "Qua đêm"});
-            this.comboShipping.Location = new System.Drawing.Point(9, 40);
-            this.comboShipping.Name = "comboShipping";
-            this.comboShipping.Size = new System.Drawing.Size(228, 21);
-            this.comboShipping.TabIndex = 1;
-            // 
-            // labelShipping
-            // 
-            this.labelShipping.AutoSize = true;
-            this.labelShipping.Location = new System.Drawing.Point(6, 24);
-            this.labelShipping.Name = "labelShipping";
-            this.labelShipping.Size = new System.Drawing.Size(84, 13);
-            this.labelShipping.TabIndex = 0;
-            this.labelShipping.Text = "Loại vận chuyển:";
+            // shipping tab removed
             // 
             // dataGridViewItems
             // 
@@ -290,9 +243,7 @@
             this.tabPageCustomer.ResumeLayout(false);
             this.groupBoxCustomer.ResumeLayout(false);
             this.groupBoxCustomer.PerformLayout();
-            this.tabPageShipping.ResumeLayout(false);
-            this.groupBoxShipping.ResumeLayout(false);
-            this.groupBoxShipping.PerformLayout();
+            // shipping tab removed
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewItems)).EndInit();
             this.statusStrip.ResumeLayout(false);
             this.statusStrip.PerformLayout();
@@ -305,13 +256,9 @@
         private System.Windows.Forms.SplitContainer splitContainerMain;
         private System.Windows.Forms.TabControl tabControlLeft;
         private System.Windows.Forms.TabPage tabPageCustomer;
-        private System.Windows.Forms.TabPage tabPageShipping;
         private System.Windows.Forms.GroupBox groupBoxCustomer;
         private System.Windows.Forms.TextBox txtCustomer;
         private System.Windows.Forms.Label labelCustomer;
-        private System.Windows.Forms.GroupBox groupBoxShipping;
-        private System.Windows.Forms.ComboBox comboShipping;
-        private System.Windows.Forms.Label labelShipping;
         private System.Windows.Forms.DataGridView dataGridViewItems;
         private System.Windows.Forms.DataGridViewTextBoxColumn colItemName;
         private System.Windows.Forms.DataGridViewTextBoxColumn colQuantity;
